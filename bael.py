@@ -141,7 +141,7 @@ if st.button("Calculer ELU"):
 
 # --- BOUTON CALCUL ELS ---
 if 'Ast_cm2' in st.session_state and 'Asc_cm2' in st.session_state:
-    if st.button("Calculer ELS"):
+    if st.button("Vérifier les contraintes ELS"):
         Ast = st.session_state['Ast_cm2']
         Asc = st.session_state['Asc_cm2']
 
