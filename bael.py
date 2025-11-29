@@ -8,7 +8,7 @@ st.set_page_config(page_title="Calcul Armatures - By El Hizazi Hatim", layout="c
 st.markdown("""
 <h1 style="text-align:center; color:#4A4A4A;">🧱 Calcul des Armatures</h1>
 <h4 style="text-align:center; color:gray;">In Concrete We Believe</h4>
-<h5 style="text-align:center; color:gray;">Réalisé par El Hizazi Hatim</h5>
+<h5 style="text-align:center; color:gray;">Made with ❤️ by EL HIZAZI Hatim</h5>
 <hr>
 """, unsafe_allow_html=True)
 
