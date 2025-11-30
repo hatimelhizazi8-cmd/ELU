@@ -15,7 +15,7 @@ st.markdown("""
 # Inputs
 b_cm = st.number_input("b (cm)", value=30.0)
 h_cm = st.number_input("h (cm)", value=50.0)
-d_cm = st.number_input("d utile (cm)", value=45.0)
+d_cm = st.number_input("d  (cm)", value=45.0)
 dp_cm = st.number_input("d' (cm)", value=4.0)
 fc28 = st.number_input("fc28 (MPa)", value=25.0)
 fe = st.selectbox("Acier (FeE)", [400, 500])
@@ -186,7 +186,8 @@ if 'Ast_cm2' in st.session_state and 'Asc_cm2' in st.session_state:
 
             st.write(f"y1 = {y1:.3f} cm")
             st.write(f"Igg' = {Igg:.3f} cm⁴")
-            st.write(f"K = {K:.6e} N/cm³")
+            K_MN_m3 = K * 1  # N/cm³ -> MN/m³
+            st.write(f"K = {K:.6e} N/cm³  ({K_MN_m3:.3f} MN/m³)")
             st.write(f"σ_b = {sigma_b_MPa:.3f} MPa  (adm = {sigma_b_adm:.3f} MPa) → {'OK' if sigma_b_MPa <= sigma_b_adm else 'NO'}")
             st.write(f"σ_s = {sigma_s_MPa:.3f} MPa  (adm = {sigma_s_adm:.3f} MPa) → {'OK' if sigma_s_MPa <= sigma_s_adm else 'NO'}")
 
