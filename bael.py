@@ -11,7 +11,7 @@ section_type = st.sidebar.radio(
     [
         "Section carrée – flexion simple",
         "Section Té – flexion simple",
-        "Poutre",
+        "Semelle",
         "Poteau",
     ],
 )

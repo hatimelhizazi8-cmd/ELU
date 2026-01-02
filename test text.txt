@@ -1,0 +1,103 @@
+    # ================= ELU =================
+    if st.button("Calculer ELU"):
+        b = b_cm * 10
+        d = d_cm * 10
+        dp = dp_cm * 10
+
+        Mu_Nmm = Mu * {"N·m": 1, "kN·m": 1e3, "MN·m": 1e6}[Mu_unit] * 1000
+
+        sigma_bc = 0.85 * fc28 / 1.5
+        mu = Mu_Nmm / (b * d**2 * sigma_bc)
+
+        st.write(f"σ_bc = {sigma_bc:.4f} MPa")
+        st.write(f"μ = {mu:.6f}")
+
+        pivot = "A" if mu < 0.186 else "B"
+        st.markdown(
+            f"<div style='padding:10px;border-radius:6px;background:#e3f2fd;text-align:center;font-weight:bold;'>Pivot {pivot}</div>",
+            unsafe_allow_html=True,
+        )
+
+        sigma_st = fe / 1.15
+        col1, col2 = st.columns(2)
+
+        if pivot == "A":
+            alpha = 1.25 * (1 - math.sqrt(1 - 2 * mu))
+            Z = d * (1 - 0.4 * alpha)
+            Ast = Mu_Nmm / (Z * sigma_st) / 100
+
+            with col1:
+                st.success(f"Ast = {Ast:.2f} cm²")
+            with col2:
+                st.info("Asc = 0 (Pivot A)")
+
+            st.session_state.Ast = Ast
+            st.session_state.Asc = 0.0
+
+        else:
+            mu_r = 0.391 if fe == 400 else 0.371
+            alpha_r = 0.669 if fe == 400 else 0.617
+
+            if mu < mu_r:
+                alpha = 1.25 * (1 - math.sqrt(1 - 2 * mu))
+                Z = d * (1 - 0.4 * alpha)
+                Ast = Mu_Nmm / (Z * sigma_st) / 100
+
+                with col1:
+                    st.success(f"Ast = {Ast:.2f} cm²")
+                with col2:
+                    st.info("Asc = 0")
+
+                st.session_state.Ast = Ast
+                st.session_state.Asc = 0.0
+            else:
+                MR = b * d**2 * sigma_bc * mu_r
+                Mr = Mu_Nmm - MR
+                Zr = d * (1 - 0.4 * alpha_r)
+
+                eps_els = 1.74e-3 if fe == 400 else 2.17e-3
+                eps_sc = ((d - dp) / d) * (eps_els + 3.5e-3) - eps_els
+                sigma_sc = fe / 1.15 if eps_sc >= eps_els else 2_718_200 * eps_sc
+
+                Ast = ((MR / Zr) + (Mr / (d - dp))) / sigma_st / 100
+                Asc = (Mr / (d - dp)) / sigma_sc / 100
+
+                with col1:
+                    st.success(f"Ast = {Ast:.2f} cm²")
+                with col2:
+                    st.warning(f"Asc = {Asc:.2f} cm²")
+
+                st.session_state.Ast = Ast
+                st.session_state.Asc = Asc
+
+    # ================= ELS =================
+    if "Ast" in st.session_state and st.button("Vérifier ELS"):
+        Ast = st.session_state.Ast
+        Asc = st.session_state.Asc
+
+        A = b_cm
+        B = 30 * (Ast + Asc)
+        C = -30 * (Ast * d_cm + Asc * dp_cm)
+
+        y1 = (-B + math.sqrt(B**2 - 4 * A * C)) / (2 * A)
+
+        Igg = (A * y1**3) / 3 + 15 * Asc * (y1 - dp_cm)**2 + 15 * Ast * (d_cm - y1)**2
+
+        Ms_Ncm = Ms * {"N·m": 1, "kN·m": 1e3, "MN·m": 1e6}[Ms_unit] * 100
+        K = Ms_Ncm / Igg
+
+        sigma_b = (K * y1) / 100
+        sigma_s = (15 * K * (d_cm - y1)) / 100
+
+        ft28 = 0.6 + 0.06 * fc28
+        sigma_b_adm = 0.6 * fc28
+
+        if crack_type == "FPP":
+            sigma_s_adm = fe / 1.15
+        elif crack_type == "FP":
+            sigma_s_adm = min(fe * 2 / 3, 110 * math.sqrt(1.6 * ft28))
+        else:
+            sigma_s_adm = min(fe / 2, 90 * math.sqrt(1.6 * ft28))
+
+        st.write(f"σ_b = {sigma_b:.2f} MPa (adm {sigma_b_adm:.2f})")
+        st.write(f"σ_s = {sigma_s:.2f} MPa (adm {sigma_s_adm:.2f})")
